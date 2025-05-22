@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acme Corporation</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+    </style>
+</head>
+<body>
+    <h2>Formulario Seguro</h2>
+    <form id="cadastro">
+        <label for="nome">Nome:</label>
+        <input id="nome" name="nome">
+        <br><br>
+        <label for="email">E-mail:</label>
+        <input id="email" name="email">
+        <br><br>
+        <label for="telefone">Telefone:</label>
+        <input id="telefone" name="telefone">
+        <br><br>
+        <button type="submit">Salvar!</button>
+    </form>
+
+    <script>
+        document.getElementById("cadastro").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let nome = document.getElementById("nome").value;
+            let email = document.getElementById("email").value;
+            let telefone = document.getElementById("telefone").value;
+
+            let dados = localStorage.getItem("cadastro_local") ? JSON.parse(localStorage.getItem("cadastro_local")) : [];
+            dados.push({ nome, email, telefone }); 
+            //Primeira vulnerabilidade (A02: Cryptographic Failures):
+            //localStorage.setItem("cadastro_local", JSON.stringify(dados)); //apenas tirando o item do localStorage
+
+            //Terceira vulnerabilidade(A01: Broken Access Control):
+            //let novaAba = window.open();
+            //novaAba.document.write(novaPagina);
+
+            let novaAba = window.open("", "_blank", "noopener, noreferrer");
+            if (novaAba) {
+                novaAba.opener = null; //Para não ter acesso à aba original 
+
+            } else {
+                alert("Nova aba bloqueada. Verifique suas configurações de navegador.");
+                return;
+            }
+
+            //Criando a nova página:
+            const doc = novaAba.document;
+            doc.open();
+            doc.write(`
+                <!DOCTYPE html>
+                <html lang="pt">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Dados Cadastrados</title>
+                    <style> 
+                        body { font-family: Arial, sans-serif; padding: 20px; } 
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    </style>
+                </head>
+                <body>
+                    <h2>Dados Cadastrados</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Telefone</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="dados-body">
+                            <!-- Segunda vulnerabilidade (A03: Injection (xss)): -->
+                            <!-- ${dados.map(d => `<tr><td>${d.nome}</td><td>${d.email}</td><td>${d.telefone}</td></tr>`).join("")} -->	
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `);
+            doc.close();
+
+            novaAba.onload = function() {
+                const dadosBody = novaAba.document.getElementById("dados-body");
+                dados.forEach(d => {
+                    const tr = novaAba.document.createElement("tr");
+
+                    const tdNome = novaAba.document.createElement("td");
+                    tdNome.textContent = d.nome;
+                    tr.appendChild(tdNome);
+
+                    const tdEmail = novaAba.document.createElement("td");
+                    tdEmail.textContent = d.email;
+                    tr.appendChild(tdEmail);
+
+                    const tdTelefone = novaAba.document.createElement("td");
+                    tdTelefone.textContent = d.telefone;
+                    tr.appendChild(tdTelefone);
+
+                    dadosBody.appendChild(tr);
+                });
+            };
+            
+            
+        });
+    </script>
+</body>
+</html>
