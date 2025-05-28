@@ -33,7 +33,7 @@
 
             let dados = localStorage.getItem("cadastro_local") ? JSON.parse(localStorage.getItem("cadastro_local")) : [];
             dados.push({ nome, email, telefone }); 
-            //Primeira vulnerabilidade (A02: Cryptographic Failures):
+            //Primeira vulnerabilidade (A04: Insecure Design):
             //localStorage.setItem("cadastro_local", JSON.stringify(dados)); //apenas tirando o item do localStorage
 
             //Terceira vulnerabilidade(A01: Broken Access Control):
@@ -88,9 +88,12 @@
 
             novaAba.onload = function() {
                 const dadosBody = novaAba.document.getElementById("dados-body");
+                // Aqui vou iterar sobre os dados salvos (nome, email, telefone)
                 dados.forEach(d => {
+                    //Crio uma nova linha<tr> para cada dado
                     const tr = novaAba.document.createElement("tr");
-
+                    //E crio as células <td> para cada campo usando o textContent, ele insere o texto como texto puro, evitando a injeção de código HTML.
+                    //isso previne a vulnerabilidade de XSS pois ele não interpreta o conteúdo como HTML.
                     const tdNome = novaAba.document.createElement("td");
                     tdNome.textContent = d.nome;
                     tr.appendChild(tdNome);
@@ -102,7 +105,7 @@
                     const tdTelefone = novaAba.document.createElement("td");
                     tdTelefone.textContent = d.telefone;
                     tr.appendChild(tdTelefone);
-
+                    //Adiciono a linha completa ao corpo da tabela <tbody> da nova aba.
                     dadosBody.appendChild(tr);
                 });
             };
