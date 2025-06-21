@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dogs Corporation - Formulário Seguro</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        form {
+            background-color: white;
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h2>Cadastre para adotar um pet</h2>
+    <form id="cadastro">
+        <label for="nome">Nome:</label>
+        <input id="nome" name="nome" required>
+
+        <label for="email">E-mail:</label>
+        <input id="email" name="email" type="email" required>
+
+        <label for="telefone">Telefone:</label>
+        <input id="telefone" name="telefone" required>
+
+        <button type="submit">Ache seu pet!</button>
+    </form>
+
+    <!-- ... tudo igual no <head> e CSS ... -->
+
+<script>
+    // Sanitiza a entrada do usuário removendo qualquer código HTML ou script potencialmente malicioso
+    function sanitizeInput(input) {
+        const temp = document.createElement("div");
+        temp.textContent = input;
+        return temp.innerHTML.trim();
+    }
+
+    //validadores para os campos do formulário
+    function validarNome(nome) {
+        return /^[A-Za-zÀ-ú\s]+$/.test(nome);
+    }
+
+    function validarEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validarTelefone(telefone) {
+        const apenasNumeros = telefone.replace(/\D/g, '');
+        return apenasNumeros.length >= 8 && apenasNumeros.length <= 15;
+    }
+
+    document.getElementById("cadastro").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        // Abre a nova aba imediatamente, antes de qualquer validação
+        let novaAba = window.open("about:blank", "_blank");
+        if (!novaAba) {
+            alert("Nova aba bloqueada. Verifique suas configurações de navegador.");
+            return;
+        }
+        novaAba.opener = null;
+
+        // Sanitiza os inputs antes de processar
+        let nome = sanitizeInput(document.getElementById("nome").value);
+        let email = sanitizeInput(document.getElementById("email").value);
+        let telefone = sanitizeInput(document.getElementById("telefone").value);
+
+        // Verifica se os campos estão preenchidos
+        if (!nome || !email || !telefone) {
+            alert("Todos os campos são obrigatórios.");
+            novaAba.close();
+            return;
+        }
+
+        // Valida os dados de entrada e exibe mensagens de erro apropriadas
+        if (!validarNome(nome)) {
+            alert("Nome inválido. Use apenas letras e espaços.");
+            novaAba.close();
+            return;
+        }
+
+        if (!validarEmail(email)) {
+            alert("E-mail inválido.");
+            novaAba.close();
+            return;
+        }
+
+        if (!validarTelefone(telefone)) {
+            alert("Telefone inválido. Use apenas números (mínimo 8 dígitos).");
+            novaAba.close();
+            return;
+        }
+
+        // Recupera os dados salvos anteriormente no localStorage (ou cria um array vazio se não houver nada)
+        // Adiciona o novo cadastro ao array e salva novamente no localStorage em formato JSON
+        let dados = localStorage.getItem("cadastro_local") ? JSON.parse(localStorage.getItem("cadastro_local")) : [];
+        dados.push({ nome, email, telefone });
+        localStorage.setItem("cadastro_local", JSON.stringify(dados));
+
+        // Abre uma nova aba para exibir os dados cadastrados
+        // Se o navegador bloquear a nova aba, exibe um alerta para o usuário
+        const doc = novaAba.document;
+        doc.open();
+        doc.write(`
+            <!DOCTYPE html>
+            <html lang="pt">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Dados Cadastrados</title>
+                <style>
+                    body {
+                        font-family: 'Segoe UI', sans-serif;
+                        background-color: #f9f9f9;
+                        padding: 30px;
+                        text-align: center;
+                    }
+                    h2 {
+                        color: #222;
+                        margin-bottom: 20px;
+                    }
+                    img {
+                        max-width: 300px;
+                        margin-bottom: 20px;
+                        border-radius: 8px;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        background: white;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                        border-radius: 8px;
+                        overflow: hidden;
+                    }
+                    th, td {
+                        padding: 12px 15px;
+                        text-align: left;
+                        border-bottom: 1px solid #ddd;
+                    }
+                    th {
+                        background-color: #007bff;
+                        color: white;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f2f2f2;
+                    }
+                    tr:hover {
+                        background-color: #e9f1ff;
+                    }
+                </style>
+            </head>
+            <body>
+                <h2>Dados Cadastrados</h2>
+                <div id="dog-container"></div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>E-mail</th>
+                            <th>Telefone</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dados-body"></tbody>
+                </table>
+            </body>
+            </html>
+        `);
+        doc.close();
+
+        //Simulação da chave de API armazenada no HashiCorp Vault:
+        // Nome: dog_api_key
+        // Caminho: Apps/dog-api/Secrets/dog_api_key
+        // Aqui usamos direto no código apenas para fins didáticos/acadêmicos
+        const apiKey = "dog_api_key_valor_simulado";
+
+        // Faz a chamada à API de cães (essa API não exige autenticação real)
+        fetch("https://dog.ceo/api/breeds/image/random")
+            .then(response => response.json())
+            .then(data => {
+                const dadosBody = novaAba.document.getElementById("dados-body");
+
+                // Mostra imagem do cachorro no topo
+                const dogContainer = novaAba.document.getElementById("dog-container");
+                const dogImg = novaAba.document.createElement("img");
+                dogImg.src = data.message;
+                dogImg.alt = "Cachorro Aleatório";
+                dogContainer.appendChild(dogImg);
+
+                // Mostra dados da tabela
+                dados.forEach(d => {
+                    const tr = novaAba.document.createElement("tr");
+
+                    const tdNome = novaAba.document.createElement("td");
+                    tdNome.textContent = d.nome;
+                    tr.appendChild(tdNome);
+
+                    const tdEmail = novaAba.document.createElement("td");
+                    tdEmail.textContent = d.email;
+                    tr.appendChild(tdEmail);
+
+                    const tdTelefone = novaAba.document.createElement("td");
+                    tdTelefone.textContent = d.telefone;
+                    tr.appendChild(tdTelefone);
+
+                    dadosBody.appendChild(tr);
+                });
+            })
+            .catch(err => {
+                console.error("Erro ao buscar imagem do cachorro:", err);
+            });
+    });
+</script>
+
+</body>
+</html>
