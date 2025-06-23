@@ -70,7 +70,6 @@
         <button type="submit">Ache seu pet!</button>
     </form>
 
-    <!-- ... tudo igual no <head> e CSS ... -->
 
 <script>
     // Sanitiza a entrada do usuário removendo qualquer código HTML ou script potencialmente malicioso
@@ -86,7 +85,7 @@
     }
 
     function validarEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
     }
 
     function validarTelefone(telefone) {
