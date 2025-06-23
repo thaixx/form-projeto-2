@@ -212,9 +212,8 @@
         doc.close();
 
         //Simulação da chave de API armazenada no HashiCorp Vault:
-        // Nome: dog_api_key
         // Caminho: Apps/dog-api/Secrets/dog_api_key
-        // Aqui usamos direto no código apenas para fins didáticos/acadêmicos
+        // Aqui usei direto para fins academicos, mas em produção deveria buscar a chave de API do Vault
         const apiKey = "dog_api_key_valor_simulado";
 
         // Faz a chamada à API de cães (essa API não exige autenticação real)
